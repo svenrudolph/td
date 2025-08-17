@@ -1,7 +1,7 @@
 extends Node2D
 
 @onready var path: Path2D = $Path2D
-@onready var spawn_timer: Timer = $SpawnTimer
+@onready var wave_spawner: Node2D = $WaveSpawner
 @onready var creep_scene: PackedScene = preload("res://scenes/creep.tscn")
 @onready var tower_scene: PackedScene = preload("res://scenes/tower.tscn")
 @onready var gold_label: Label = $UI/GoldLabel
@@ -15,12 +15,9 @@ var player_gold: int = 100
 var selected_tower_scene: PackedScene = null
 
 var waves := [
-		{ "count": 5, "health_multiplier": 1.0, "interval": 1.0 },
-		{ "count": 8, "health_multiplier": 1.2, "interval": 0.8 }
+	{ "count": 5, "health_multiplier": 1.0, "interval": 1.0 },
+	{ "count": 8, "health_multiplier": 1.2, "interval": 0.8 }
 ]
-
-var current_wave: int = 0
-var creeps_spawned: int = 0
 
 func _ready() -> void:
 	if path.curve == null:
@@ -28,91 +25,79 @@ func _ready() -> void:
 	path.curve.clear_points()
 	path.curve.add_point(Vector2(0, 300))
 	path.curve.add_point(Vector2(600, 300))
-	spawn_timer.timeout.connect(_on_spawn_timer_timeout)
 	for x in range(40):
 		for y in range(25):
 			tile_map.set_cell(0, Vector2i(x, y), 0, Vector2i.ZERO)
-        start_wave()
-        _update_gold_label()
-        var temp_tower: Node = tower_scene.instantiate()
-        build_button.text = "Build Tower (%d)" % temp_tower.cost
-        build_button.toggled.connect(_on_build_button_toggled)
-        temp_tower.queue_free()
-
-
-func start_wave() -> void:
-		if current_wave >= waves.size():
-				return
-		creeps_spawned = 0
-		var wave = waves[current_wave]
-		spawn_timer.wait_time = wave.interval
-		if wave_label:
-				wave_label.text = "Wave %d" % (current_wave + 1)
-		spawn_timer.start()
-
-func _on_spawn_timer_timeout() -> void:
-		var wave = waves[current_wave]
-		var creep := creep_scene.instantiate()
-		creep.path = path
-		creep.health = int(creep.health * wave.health_multiplier)
-		add_child(creep)
-		creeps_spawned += 1
-		if creeps_spawned >= wave.count:
-				spawn_timer.stop()
-				current_wave += 1
-				if current_wave < waves.size():
-						await get_tree().create_timer(2.0).timeout
-						start_wave()
-
+	wave_spawner.creep_scene = creep_scene
+	wave_spawner.waves = waves
+	wave_spawner.waypoints = _get_waypoints()
+	wave_spawner.wave_started.connect(_on_wave_started)
+	_update_gold_label()
+	var temp_tower: Node = tower_scene.instantiate()
+	build_button.text = "Build Tower (%d)" % temp_tower.cost
+	build_button.toggled.connect(_on_build_button_toggled)
+	temp_tower.queue_free()
+	_on_wave_started(0)
 
 func _unhandled_input(event: InputEvent) -> void:
-                if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-                                if selected_tower_scene == null:
-                                                return
-                                var cell := _world_to_cell(event.position)
-                                if not _is_cell_free(cell):
-                                                return
-                                if _is_on_path(event.position):
-                                                return
-                                var tower := selected_tower_scene.instantiate()
-                                if spend_gold(tower.cost):
-                                                tower.global_position = _cell_to_world(cell)
-                                                add_child(tower)
-                                                occupied_cells[cell] = true
-                                                build_button.button_pressed = false
-                                                selected_tower_scene = null
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if selected_tower_scene == null:
+			return
+		var cell := _world_to_cell(event.position)
+		if not _is_cell_free(cell):
+			return
+		if _is_on_path(event.position):
+			return
+		var tower := selected_tower_scene.instantiate()
+		if spend_gold(tower.cost):
+			tower.global_position = _cell_to_world(cell)
+			add_child(tower)
+			occupied_cells[cell] = true
+			build_button.button_pressed = false
+			selected_tower_scene = null
 
 func _world_to_cell(pos: Vector2) -> Vector2i:
-                return Vector2i(floor(pos.x / GRID_SIZE), floor(pos.y / GRID_SIZE))
+	return Vector2i(floor(pos.x / GRID_SIZE), floor(pos.y / GRID_SIZE))
 
 func _cell_to_world(cell: Vector2i) -> Vector2:
-                return Vector2(cell.x * GRID_SIZE + GRID_SIZE / 2, cell.y * GRID_SIZE + GRID_SIZE / 2)
+	return Vector2(cell.x * GRID_SIZE + GRID_SIZE / 2, cell.y * GRID_SIZE + GRID_SIZE / 2)
 
 func _is_cell_free(cell: Vector2i) -> bool:
-                return not occupied_cells.has(cell)
+	return not occupied_cells.has(cell)
 
 func _is_on_path(pos: Vector2) -> bool:
-                if path and path.curve:
-                                var closest = path.curve.get_closest_point(pos)
-                                return pos.distance_to(closest) < GRID_SIZE / 2
-                return false
+	if path and path.curve:
+		var closest = path.curve.get_closest_point(pos)
+		return pos.distance_to(closest) < GRID_SIZE / 2
+	return false
+
+func _get_waypoints() -> Array[Vector2]:
+	var pts: Array[Vector2] = []
+	var curve := path.curve
+	for i in range(curve.get_point_count()):
+		pts.append(path.to_global(curve.get_point_position(i)))
+	return pts
+
+func _on_wave_started(index: int) -> void:
+	if wave_label:
+		wave_label.text = "Wave %d" % (index + 1)
 
 func _update_gold_label() -> void:
-		gold_label.text = "Gold: %d" % player_gold
+	gold_label.text = "Gold: %d" % player_gold
 
 func add_gold(amount: int) -> void:
-		player_gold += amount
-		_update_gold_label()
+	player_gold += amount
+	_update_gold_label()
 
 func spend_gold(amount: int) -> bool:
-                if player_gold >= amount:
-                                player_gold -= amount
-                                _update_gold_label()
-                                return true
-                return false
+	if player_gold >= amount:
+		player_gold -= amount
+		_update_gold_label()
+		return true
+	return false
 
 func _on_build_button_toggled(pressed: bool) -> void:
-                if pressed:
-                                selected_tower_scene = tower_scene
-                else:
-                                selected_tower_scene = null
+	if pressed:
+		selected_tower_scene = tower_scene
+	else:
+		selected_tower_scene = null
