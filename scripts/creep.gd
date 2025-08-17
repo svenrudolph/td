@@ -1,6 +1,5 @@
 extends CreepPathfinder
 
-@export var speed: float = 50.0
 @export var max_health: int = 10
 @export var health: int = 10
 

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bs2aucesg5meu" path="res://scripts/main.gd" id="1"]
 [ext_resource type="TileSet" uid="uid://cg1tk0eio6kmw" path="res://art/ground_tileset.tres" id="2"]
-[ext_resource type="Script" path="res://scripts/wave_spawner.gd" id="3"]
+[ext_resource type="Script" uid="uid://dy8ty8liuij5f" path="res://scripts/wave_spawner.gd" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/creep.tscn" id="4"]
 
 [sub_resource type="Curve2D" id="1"]
@@ -20,7 +20,6 @@ tile_set = ExtResource("2")
 
 [node name="Path2D" type="Path2D" parent="."]
 curve = SubResource("1")
-
 
 [node name="WaveSpawner" type="Node2D" parent="."]
 script = ExtResource("3")
