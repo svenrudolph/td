@@ -38,6 +38,15 @@ func start_wave() -> void:
 				wave_label.text = "Wave %d" % (current_wave + 1)
 		spawn_timer.start()
 
+func start_wave() -> void:
+        if current_wave >= waves.size():
+                return
+        creeps_spawned = 0
+        var wave = waves[current_wave]
+        spawn_timer.wait_time = wave.interval
+        if wave_label:
+                wave_label.text = "Wave %d" % (current_wave + 1)
+        spawn_timer.start()
 
 func _on_spawn_timer_timeout() -> void:
 		var wave = waves[current_wave]
