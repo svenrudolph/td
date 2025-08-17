@@ -6,6 +6,7 @@ extends Node2D
 @onready var tower_scene: PackedScene = preload("res://scenes/tower.tscn")
 @onready var gold_label: Label = $UI/GoldLabel
 @onready var wave_label: Label = $UI/WaveLabel
+@onready var tile_map: TileMap = $TileMap
 
 var player_gold: int = 100
 
@@ -24,6 +25,9 @@ func _ready() -> void:
 	path.curve.add_point(Vector2(0, 300))
 	path.curve.add_point(Vector2(600, 300))
 	spawn_timer.timeout.connect(_on_spawn_timer_timeout)
+	for x in range(40):
+		for y in range(25):
+			tile_map.set_cell(0, Vector2i(x, y), 0, Vector2i.ZERO)
 	start_wave()
 	_update_gold_label()
 
