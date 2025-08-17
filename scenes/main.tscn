@@ -12,6 +12,10 @@ script = ExtResource("1")
 tile_set = ExtResource("2")
 format = 2
 
+[node name="Layer0" type="TileMapLayer" parent="TileMap"]
+use_parent_material = true
+tile_set = ExtResource("2")
+
 [node name="Path2D" type="Path2D" parent="."]
 curve = SubResource("1")
 
