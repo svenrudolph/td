@@ -90,14 +90,14 @@ func add_gold(amount: int) -> void:
     _update_gold_label()
 
 func spend_gold(amount: int) -> bool:
-    if player_gold >= amount:
-        player_gold -= amount
-        _update_gold_label()
-        return true
-    return false
+	if player_gold >= amount:
+		player_gold -= amount
+		_update_gold_label()
+		return true
+	return false
 
 func _on_build_button_toggled(pressed: bool) -> void:
-    if pressed:
-        selected_tower_scene = tower_scene
-    else:
-        selected_tower_scene = null
+	if pressed:
+		selected_tower_scene = tower_scene
+	else:
+		selected_tower_scene = null
