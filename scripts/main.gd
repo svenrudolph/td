@@ -7,10 +7,12 @@ extends Node2D
 @onready var gold_label: Label = $UI/GoldLabel
 @onready var wave_label: Label = $UI/WaveLabel
 @onready var tile_map: TileMap = $TileMap
+@onready var build_button: Button = $UI/BuildButton
 
 const GRID_SIZE: int = 64
 var occupied_cells := {}
 var player_gold: int = 100
+var selected_tower_scene: PackedScene = null
 
 var waves := [
 		{ "count": 5, "health_multiplier": 1.0, "interval": 1.0 },
@@ -30,8 +32,12 @@ func _ready() -> void:
 	for x in range(40):
 		for y in range(25):
 			tile_map.set_cell(0, Vector2i(x, y), 0, Vector2i.ZERO)
-	start_wave()
-	_update_gold_label()
+		start_wave()
+		_update_gold_label()
+		var temp_tower: Node = tower_scene.instantiate()
+		build_button.text = "Build Tower (%d)" % temp_tower.cost
+		build_button.toggled.connect(_on_build_button_toggled)
+		temp_tower.queue_free()
 
 
 func start_wave() -> void:
@@ -61,16 +67,20 @@ func _on_spawn_timer_timeout() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if selected_tower_scene == null:
+			return
 		var cell := _world_to_cell(event.position)
 		if not _is_cell_free(cell):
 			return
 		if _is_on_path(event.position):
 			return
-		var tower := tower_scene.instantiate()
+		var tower := selected_tower_scene.instantiate()
 		if spend_gold(tower.cost):
 			tower.global_position = _cell_to_world(cell)
 			add_child(tower)
 			occupied_cells[cell] = true
+			build_button.button_pressed = false
+			selected_tower_scene = null
 
 func _world_to_cell(pos: Vector2) -> Vector2i:
 	return Vector2i(floor(pos.x / GRID_SIZE), floor(pos.y / GRID_SIZE))
@@ -95,8 +105,14 @@ func add_gold(amount: int) -> void:
 		_update_gold_label()
 
 func spend_gold(amount: int) -> bool:
-		if player_gold >= amount:
-				player_gold -= amount
-				_update_gold_label()
-				return true
-		return false
+	if player_gold >= amount:
+		player_gold -= amount
+		_update_gold_label()
+		return true
+	return false
+
+func _on_build_button_toggled(pressed: bool) -> void:
+	if pressed:
+		selected_tower_scene = tower_scene
+	else:
+		selected_tower_scene = null

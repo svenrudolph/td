@@ -32,3 +32,9 @@ text = "Gold: 0"
 offset_left = 10.0
 offset_top = 30.0
 text = "Wave 1"
+
+[node name="BuildButton" type="Button" parent="UI"]
+offset_left = 10.0
+offset_top = 60.0
+text = "Build Tower"
+toggle_mode = true
