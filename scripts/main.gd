@@ -7,6 +7,8 @@ extends Node2D
 @onready var gold_label: Label = $UI/GoldLabel
 @onready var wave_label: Label = $UI/WaveLabel
 
+const GRID_SIZE: int = 64
+var occupied_cells := {}
 var player_gold: int = 100
 
 var waves := [
@@ -54,11 +56,32 @@ func _on_spawn_timer_timeout() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-				var tower := tower_scene.instantiate()
-				if spend_gold(tower.cost):
-						tower.global_position = event.position
-						add_child(tower)
+                if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+                                var cell := _world_to_cell(event.position)
+                                if not _is_cell_free(cell):
+                                                return
+                                if _is_on_path(event.position):
+                                                return
+                                var tower := tower_scene.instantiate()
+                                if spend_gold(tower.cost):
+                                                tower.global_position = _cell_to_world(cell)
+                                                add_child(tower)
+                                                occupied_cells[cell] = true
+
+func _world_to_cell(pos: Vector2) -> Vector2i:
+                return Vector2i(floor(pos.x / GRID_SIZE), floor(pos.y / GRID_SIZE))
+
+func _cell_to_world(cell: Vector2i) -> Vector2:
+                return Vector2(cell.x * GRID_SIZE + GRID_SIZE / 2, cell.y * GRID_SIZE + GRID_SIZE / 2)
+
+func _is_cell_free(cell: Vector2i) -> bool:
+                return not occupied_cells.has(cell)
+
+func _is_on_path(pos: Vector2) -> bool:
+                if path and path.curve:
+                                var closest = path.curve.get_closest_point(pos)
+                                return pos.distance_to(closest) < GRID_SIZE / 2
+                return false
 
 func _update_gold_label() -> void:
 		gold_label.text = "Gold: %d" % player_gold
