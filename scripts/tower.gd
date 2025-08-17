@@ -3,6 +3,7 @@ extends Node2D
 @export var attack_range: float = 120.0
 @export var fire_rate: float = 1.0
 @export var damage: int = 5
+@export var cost: int = 10
 var cooldown: float = 0.0
 
 
