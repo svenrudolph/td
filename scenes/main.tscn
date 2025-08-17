@@ -14,7 +14,7 @@ script = ExtResource("1")
 tile_set = ExtResource("2")
 format = 2
 
-[node name="Layer0" type="TileMapLayer" parent="TileMap"]
+[node name="Layer1" type="TileMapLayer" parent="TileMap"]
 use_parent_material = true
 tile_set = ExtResource("2")
 
@@ -41,5 +41,6 @@ text = "Wave 1"
 [node name="BuildButton" type="Button" parent="UI"]
 offset_left = 10.0
 offset_top = 60.0
-text = "Build Tower"
 toggle_mode = true
+text = "Build Tower"
+
