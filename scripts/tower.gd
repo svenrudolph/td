@@ -5,6 +5,11 @@ extends Node2D
 @export var damage: int = 5
 var cooldown: float = 0.0
 
+
+func _ready() -> void:
+	queue_redraw()
+
+
 func _process(delta: float) -> void:
 	cooldown -= delta
 	if cooldown <= 0.0:
@@ -22,3 +27,6 @@ func _get_target() -> Node2D:
 			closest = creep
 			closest_dist = dist
 	return closest
+
+func _draw() -> void:
+	draw_circle(Vector2.ZERO, 12.0, Color.BLUE)
