@@ -4,7 +4,10 @@ extends Node2D
 @onready var spawn_timer: Timer = $SpawnTimer
 @onready var creep_scene: PackedScene = preload("res://scenes/creep.tscn")
 @onready var tower_scene: PackedScene = preload("res://scenes/tower.tscn")
+@onready var gold_label: Label = $UI/GoldLabel
 @onready var wave_label: Label = get_node_or_null("WaveLabel")
+
+var player_gold: int = 100
 
 var waves := [
         { "count": 5, "health_multiplier": 1.0, "interval": 1.0 },
@@ -14,15 +17,15 @@ var waves := [
 var current_wave: int = 0
 var creeps_spawned: int = 0
 
-
 func _ready() -> void:
-        if path.curve == null:
-                path.curve = Curve2D.new()
-        path.curve.clear_points()
-        path.curve.add_point(Vector2(0, 300))
-        path.curve.add_point(Vector2(600, 300))
+	if path.curve == null:
+		path.curve = Curve2D.new()
+	path.curve.clear_points()
+	path.curve.add_point(Vector2(0, 300))
+	path.curve.add_point(Vector2(600, 300))
         spawn_timer.timeout.connect(_on_spawn_timer_timeout)
         start_wave()
+        _update_gold_label()
 
 
 func start_wave() -> void:
@@ -52,7 +55,22 @@ func _on_spawn_timer_timeout() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var tower := tower_scene.instantiate()
-		tower.global_position = event.position
-		add_child(tower)
+        if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+                var tower := tower_scene.instantiate()
+                if spend_gold(tower.cost):
+                        tower.global_position = event.position
+                        add_child(tower)
+
+func _update_gold_label() -> void:
+        gold_label.text = "Gold: %d" % player_gold
+
+func add_gold(amount: int) -> void:
+        player_gold += amount
+        _update_gold_label()
+
+func spend_gold(amount: int) -> bool:
+        if player_gold >= amount:
+                player_gold -= amount
+                _update_gold_label()
+                return true
+        return false

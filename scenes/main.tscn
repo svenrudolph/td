@@ -9,6 +9,13 @@ script = ExtResource("1")
 
 [node name="SpawnTimer" type="Timer" parent="."]
 
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="GoldLabel" type="Label" parent="UI"]
+offset_left = 10.0
+offset_top = 10.0
+text = "Gold: 0"
+
 [node name="WaveLabel" type="Label" parent="."]
 offset_left = 10.0
 offset_top = 10.0

@@ -23,6 +23,7 @@ func take_damage(amount: int) -> void:
         health -= amount
         queue_redraw()
         if health <= 0:
+                get_node("/root/Main").add_gold(5)
                 queue_free()
 
 
