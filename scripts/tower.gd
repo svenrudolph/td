@@ -1,6 +1,6 @@
 extends Node2D
 
-@export var range: float = 120.0
+@export var attack_range: float = 120.0
 @export var fire_rate: float = 1.0
 @export var damage: int = 5
 var cooldown: float = 0.0
@@ -15,7 +15,7 @@ func _process(delta: float) -> void:
 
 func _get_target() -> Node2D:
     var closest: Node2D = null
-    var closest_dist := range
+    var closest_dist := attack_range
     for creep in get_tree().get_nodes_in_group("creeps"):
         var dist := global_position.distance_to(creep.global_position)
         if dist < closest_dist:
