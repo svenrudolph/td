@@ -19,9 +19,10 @@ func _ready() -> void:
 
 
 func take_damage(amount: int) -> void:
-	health -= amount
-	if health <= 0:
-		queue_free()
+        health -= amount
+        if health <= 0:
+                get_node("/root/Main").add_gold(5)
+                queue_free()
 
 
 func _process(delta: float) -> void:
