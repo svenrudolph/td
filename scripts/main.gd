@@ -6,6 +6,8 @@ extends Node2D
 @onready var tower_scene := preload("res://scenes/tower.tscn")
 
 func _ready() -> void:
+    if path.curve == null:
+        path.curve = Curve2D.new()
     path.curve.clear_points()
     path.curve.add_point(Vector2(0, 300))
     path.curve.add_point(Vector2(600, 300))
