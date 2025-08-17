@@ -5,7 +5,7 @@ extends Node2D
 @onready var creep_scene: PackedScene = preload("res://scenes/creep.tscn")
 @onready var tower_scene: PackedScene = preload("res://scenes/tower.tscn")
 @onready var gold_label: Label = $UI/GoldLabel
-@onready var wave_label: Label = get_node_or_null("WaveLabel")
+@onready var wave_label: Label = $UI/WaveLabel
 
 var player_gold: int = 100
 

@@ -24,7 +24,7 @@ offset_left = 10.0
 offset_top = 10.0
 text = "Gold: 0"
 
-[node name="WaveLabel" type="Label" parent="."]
+[node name="WaveLabel" type="Label" parent="UI"]
 offset_left = 10.0
-offset_top = 10.0
+offset_top = 30.0
 text = "Wave 1"
